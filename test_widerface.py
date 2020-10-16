@@ -83,8 +83,13 @@ if __name__ == '__main__':
     cudnn.benchmark = True
     device = torch.device("cpu" if args.cpu else "cuda")
     net = net.to(device)
-    img = torch.rand(1, 3, 128, 128)
-    #net = torch.jit.trace(net, (img,))
+    img = torch.rand(1, 3, 1024, 1024)
+    net = torch.jit.trace(net, (img,))
+
+    torch._C._jit_set_profiling_executor(False)
+    torch._C._jit_set_profiling_mode(True)
+    torch._C._jit_set_bailout_depth(20)
+    torch._C._jit_set_num_profiled_runs(1)
 
     import os
     import psutil
@@ -92,7 +97,7 @@ if __name__ == '__main__':
     print(process.memory_info().rss) 
 
     for i in range(100):
-        print("memory = ", process.memory_info().rss // (1024 * 1024))
+        print("memory = ", process.memory_info().rss / (1024 * 1024))
         net(img)
 
     # testing dataset
