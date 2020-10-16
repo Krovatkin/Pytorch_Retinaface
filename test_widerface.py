@@ -82,14 +82,16 @@ if __name__ == '__main__':
     print(net)
     cudnn.benchmark = True
     device = torch.device("cpu" if args.cpu else "cuda")
+    torch._C._jit_set_profiling_executor(True)
+    torch._C._jit_set_profiling_mode(True)
+    torch._C._set_graph_executor_optimize(False)
+    torch._C._jit_set_bailout_depth(20)
+    torch._C._jit_set_num_profiled_runs(1)
     net = net.to(device)
     img = torch.rand(1, 3, 1024, 1024)
     net = torch.jit.trace(net, (img,))
 
-    torch._C._jit_set_profiling_executor(False)
-    torch._C._jit_set_profiling_mode(True)
-    torch._C._jit_set_bailout_depth(20)
-    torch._C._jit_set_num_profiled_runs(1)
+
 
     import os
     import psutil
